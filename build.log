@@ -1,0 +1,93 @@
+[33m❯[39m Building...
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+Application initialized. User authenticated: false
+[32m✔[39m Building...
+[35mBrowser bundles[39m     
+[1mInitial chunk files[22m [2m | [22m[1mNames[22m                     [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mstyles-YGGL5DJQ.css[39m [2m | [22m[2mstyles[22m                    [2m | [22m[36m865.35 kB[39m[2m | [22m               [36m66.24 kB[39m
+[32mchunk-MZAN5Z3C.js[39m   [2m | [22m[2m-[22m                         [2m | [22m[36m177.53 kB[39m[2m | [22m               [36m52.36 kB[39m
+[32mchunk-IP4AC2TG.js[39m   [2m | [22m[2m-[22m                         [2m | [22m[36m154.78 kB[39m[2m | [22m               [36m39.55 kB[39m
+[32mchunk-OFNJJKRW.js[39m   [2m | [22m[2m-[22m                         [2m | [22m [36m44.80 kB[39m[2m | [22m                [36m9.11 kB[39m
+[32mchunk-YFG76GL4.js[39m   [2m | [22m[2m-[22m                         [2m | [22m [36m38.45 kB[39m[2m | [22m                [36m9.11 kB[39m
+[32mchunk-CMLMNSFB.js[39m   [2m | [22m[2m-[22m                         [2m | [22m [36m21.53 kB[39m[2m | [22m                [36m3.40 kB[39m
+[32mmain-2RUCR7XC.js[39m    [2m | [22m[2mmain[22m                      [2m | [22m  [36m5.09 kB[39m[2m | [22m                [36m1.69 kB[39m
+[32mchunk-NYD2AEIY.js[39m   [2m | [22m[2m-[22m                         [2m | [22m  [36m3.75 kB[39m[2m | [22m                [36m1.22 kB[39m
+[32mchunk-RIVCGOLC.js[39m   [2m | [22m[2m-[22m                         [2m | [22m[36m794 bytes[39m[2m | [22m              [36m794 bytes[39m
+[32mchunk-7CGTOI24.js[39m   [2m | [22m[2m-[22m                         [2m | [22m[36m618 bytes[39m[2m | [22m              [36m618 bytes[39m
+
+[1m [22m                   [2m | [22m[1mInitial total[22m             [2m | [22m  [1m1.31 MB[22m[2m | [22m              [1m184.10 kB[22m
+
+[1mLazy chunk files[22m    [2m | [22m[1mNames[22m                     [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-G3N76TZG.js[39m   [2m | [22m[2memployee-form-component[22m   [2m | [22m [36m35.76 kB[39m[2m | [22m                [36m8.59 kB[39m
+[32mchunk-EDUE7REO.js[39m   [2m | [22m[2mdashboard-component[22m       [2m | [22m [36m34.55 kB[39m[2m | [22m                [36m8.10 kB[39m
+[32mchunk-3OPNCHUT.js[39m   [2m | [22m[2memployees-list-component[22m  [2m | [22m [36m23.49 kB[39m[2m | [22m                [36m5.98 kB[39m
+[32mchunk-QCZWRJ3L.js[39m   [2m | [22m[2mtraining-routes[22m           [2m | [22m [36m22.26 kB[39m[2m | [22m                [36m5.14 kB[39m
+[32mchunk-6LAV4YOP.js[39m   [2m | [22m[2mattendance-list-component[22m [2m | [22m [36m18.87 kB[39m[2m | [22m                [36m5.07 kB[39m
+[32mchunk-E55NS7KR.js[39m   [2m | [22m[2mleave-list-component[22m      [2m | [22m [36m18.26 kB[39m[2m | [22m                [36m4.60 kB[39m
+[32mchunk-M2HJGC65.js[39m   [2m | [22m[2mpayroll-list-component[22m    [2m | [22m [36m18.10 kB[39m[2m | [22m                [36m4.87 kB[39m
+[32mchunk-SK3C5XYU.js[39m   [2m | [22m[2mevents-calendar-component[22m [2m | [22m [36m13.89 kB[39m[2m | [22m                [36m3.69 kB[39m
+[32mchunk-QGU5BYOU.js[39m   [2m | [22m[2maccount-settings-component[22m[2m | [22m [36m12.85 kB[39m[2m | [22m                [36m3.01 kB[39m
+[32mchunk-QAJIEDGS.js[39m   [2m | [22m[2memployee-detail-component[22m [2m | [22m [36m11.76 kB[39m[2m | [22m                [36m3.27 kB[39m
+[32mchunk-TSZ6PDEU.js[39m   [2m | [22m[2mlogin-component[22m           [2m | [22m  [36m8.98 kB[39m[2m | [22m                [36m2.92 kB[39m
+[32mchunk-YUI2IOOE.js[39m   [2m | [22m[2mrecent-activity-component[22m [2m | [22m  [36m3.39 kB[39m[2m | [22m                [36m1.33 kB[39m
+[32mchunk-6XU3L7AS.js[39m   [2m | [22m[2mfeedback-list-component[22m   [2m | [22m  [36m3.03 kB[39m[2m | [22m                [36m1.24 kB[39m
+[32mchunk-B4FEHMIN.js[39m   [2m | [22m[2maccess-denied-component[22m   [2m | [22m  [36m1.13 kB[39m[2m | [22m              [36m541 bytes[39m
+[32mchunk-2OTWQW5N.js[39m   [2m | [22m[2memployees-routes[22m          [2m | [22m[36m650 bytes[39m[2m | [22m              [36m650 bytes[39m
+[2m...and 8 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+
+[35mServer bundles[39m      
+[1mInitial chunk files[22m [2m | [22m[1mNames[22m                     [2m | [22m [1mRaw size[22m
+[32mserver.mjs[39m          [2m | [22m[2mserver[22m                    [2m | [22m[36m808.82 kB[39m[2m | [22m                       
+[32mmain.server.mjs[39m     [2m | [22m[2mmain.server[22m               [2m | [22m[36m454.28 kB[39m[2m | [22m                       
+[32mpolyfills.server.mjs[39m[2m | [22m[2mpolyfills.server[22m          [2m | [22m[36m233.25 kB[39m[2m | [22m                       
+[32mchunk-JK7QR2IE.mjs[39m  [2m | [22m[2m-[22m                         [2m | [22m[36m177.11 kB[39m[2m | [22m                       
+[32mchunk-MOXTQERG.mjs[39m  [2m | [22m[2m-[22m                         [2m | [22m[36m154.38 kB[39m[2m | [22m                       
+[32mchunk-VIPFZEVU.mjs[39m  [2m | [22m[2m-[22m                         [2m | [22m [36m44.83 kB[39m[2m | [22m                       
+[32mchunk-MXYRVE76.mjs[39m  [2m | [22m[2m-[22m                         [2m | [22m [36m38.49 kB[39m[2m | [22m                       
+[32mchunk-QGD5ITRX.mjs[39m  [2m | [22m[2m-[22m                         [2m | [22m [36m21.57 kB[39m[2m | [22m                       
+[32mchunk-N2XJ3XFB.mjs[39m  [2m | [22m[2m-[22m                         [2m | [22m  [36m3.78 kB[39m[2m | [22m                       
+[32mchunk-L2MVFUKD.mjs[39m  [2m | [22m[2m-[22m                         [2m | [22m  [36m1.32 kB[39m[2m | [22m                       
+[32mchunk-T55IDOPT.mjs[39m  [2m | [22m[2m-[22m                         [2m | [22m[36m976 bytes[39m[2m | [22m                       
+[32mchunk-5O6DOP6N.mjs[39m  [2m | [22m[2m-[22m                         [2m | [22m[36m829 bytes[39m[2m | [22m                       
+
+[1mLazy chunk files[22m    [2m | [22m[1mNames[22m                     [2m | [22m [1mRaw size[22m
+[32mchunk-AA2777ZS.mjs[39m  [2m | [22m[2memployee-form-component[22m   [2m | [22m [36m35.80 kB[39m[2m | [22m                       
+[32mchunk-AKRRNWBM.mjs[39m  [2m | [22m[2mdashboard-component[22m       [2m | [22m [36m34.59 kB[39m[2m | [22m                       
+[32mchunk-F5KUJF4A.mjs[39m  [2m | [22m[2memployees-list-component[22m  [2m | [22m [36m23.53 kB[39m[2m | [22m                       
+[32mchunk-L6PWDNGQ.mjs[39m  [2m | [22m[2mtraining-routes[22m           [2m | [22m [36m22.30 kB[39m[2m | [22m                       
+[32mchunk-2F4E2B4R.mjs[39m  [2m | [22m[2mattendance-list-component[22m [2m | [22m [36m18.91 kB[39m[2m | [22m                       
+[32mchunk-4B6NDALH.mjs[39m  [2m | [22m[2mleave-list-component[22m      [2m | [22m [36m18.30 kB[39m[2m | [22m                       
+[32mchunk-33MRHHCO.mjs[39m  [2m | [22m[2mpayroll-list-component[22m    [2m | [22m [36m18.14 kB[39m[2m | [22m                       
+[32mchunk-VGZ2I7DJ.mjs[39m  [2m | [22m[2mevents-calendar-component[22m [2m | [22m [36m13.93 kB[39m[2m | [22m                       
+[32mchunk-LKC2MX57.mjs[39m  [2m | [22m[2maccount-settings-component[22m[2m | [22m [36m12.88 kB[39m[2m | [22m                       
+[32mchunk-RHDGF2TI.mjs[39m  [2m | [22m[2mxhr2[22m                      [2m | [22m [36m12.14 kB[39m[2m | [22m                       
+[32mchunk-N3SI5I4Q.mjs[39m  [2m | [22m[2mxhr2[22m                      [2m | [22m [36m12.07 kB[39m[2m | [22m                       
+[32mchunk-UIXZ44JT.mjs[39m  [2m | [22m[2memployee-detail-component[22m [2m | [22m [36m11.80 kB[39m[2m | [22m                       
+[32mchunk-DEN6J5Z3.mjs[39m  [2m | [22m[2mlogin-component[22m           [2m | [22m  [36m9.02 kB[39m[2m | [22m                       
+[32mchunk-OMNBOHNH.mjs[39m  [2m | [22m[2mrecent-activity-component[22m [2m | [22m  [36m3.43 kB[39m[2m | [22m                       
+[32mchunk-4M675YYL.mjs[39m  [2m | [22m[2mfeedback-list-component[22m   [2m | [22m  [36m3.07 kB[39m[2m | [22m                       
+[2m...and 10 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+[35mPrerendered 15 static routes.[39m
+Application bundle generation complete. [31.301 seconds] - 2026-04-16T17:03:42.474Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mangular:styles/component:css;c84806ebfe822a69d79e9f96750eada73d0d93c8ca912eb9b13a60845fb7de7c;c:/Users/Manikandaprabhu/Downloads/e-hrms-main/e-hrms-main/src/app/features/dashboard/dashboard.component.ts exceeded maximum budget. Budget 6.00 kB was not met by 4.00 kB with a total of 9.99 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mangular:styles/component:css;07a963df01e208d7ec0338c2c95f4611e8c8f85b293a7c140879935ca5365d62;c:/Users/Manikandaprabhu/Downloads/e-hrms-main/e-hrms-main/src/app/features/training/training-list.component.ts exceeded maximum budget. Budget 6.00 kB was not met by 125 bytes with a total of 6.13 kB.[0m
+
+[39m[22m
+Output location: c:\Users\Manikandaprabhu\Downloads\e-hrms-main\e-hrms-main\dist\e-hrms
+
