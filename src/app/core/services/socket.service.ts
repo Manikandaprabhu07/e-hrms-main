@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { getRuntimeEnv } from '../config/runtime-env';
 
 export interface Message {
   id: string;
@@ -54,7 +55,7 @@ export class SocketService {
 
   constructor() {}
 
-  connectChat(url: string = 'http://localhost:3000'): void {
+  connectChat(url?: string): void {
     if (this.chatSocket?.connected) return;
 
 
@@ -64,7 +65,10 @@ export class SocketService {
       return;
     }
 
-    this.chatSocket = io(`${url}/chat`, {
+    const env = getRuntimeEnv();
+    const baseUrl = (url ?? env.SOCKET_BASE_URL).trim();
+
+    this.chatSocket = io(`${baseUrl}/chat`, {
       auth: { token },
       reconnection: true,
       reconnectionDelay: 1000,
@@ -75,7 +79,7 @@ export class SocketService {
     this.setupChatListeners();
   }
 
-  connectNotifications(url: string = 'http://localhost:3000'): void {
+  connectNotifications(url?: string): void {
     if (this.notificationSocket?.connected) return;
 
 
@@ -85,7 +89,10 @@ export class SocketService {
       return;
     }
 
-    this.notificationSocket = io(`${url}/notifications`, {
+    const env = getRuntimeEnv();
+    const baseUrl = (url ?? env.SOCKET_BASE_URL).trim();
+
+    this.notificationSocket = io(`${baseUrl}/notifications`, {
       auth: { token },
       reconnection: true,
       reconnectionDelay: 1000,
