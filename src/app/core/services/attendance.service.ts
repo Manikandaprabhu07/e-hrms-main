@@ -52,7 +52,7 @@ export class AttendanceService {
     this.errorSignal.set(null);
 
     return new Promise((resolve, reject) => {
-      this.http.get<ApiAttendance[]>(`${BASE}/attendance`).subscribe({
+      this.http.get<ApiAttendance[]>(`${this.apiUrl}/attendance`).subscribe({
         next: (records) => {
           this.isLoadingSignal.set(false);
           this.attendanceRecordsSignal.set(records || []);
@@ -72,7 +72,7 @@ export class AttendanceService {
     this.errorSignal.set(null);
 
     return new Promise((resolve, reject) => {
-      this.http.get<ApiAttendance[]>(`${BASE}/employee/${employeeId}`).subscribe({
+      this.http.get<ApiAttendance[]>(`${this.apiUrl}/employee/${employeeId}`).subscribe({
         next: (records) => {
           this.isLoadingSignal.set(false);
           this.attendanceRecordsSignal.set(records || []);
@@ -92,7 +92,7 @@ export class AttendanceService {
     this.errorSignal.set(null);
 
     return new Promise((resolve, reject) => {
-      this.http.get<ApiAttendance[]>(`${BASE}/my`).subscribe({
+      this.http.get<ApiAttendance[]>(`${this.apiUrl}/my`).subscribe({
         next: (records) => {
           this.isLoadingSignal.set(false);
           this.attendanceRecordsSignal.set(records || []);
@@ -112,7 +112,7 @@ export class AttendanceService {
     this.errorSignal.set(null);
 
     return new Promise((resolve, reject) => {
-      this.http.post<ApiAttendance>(`${BASE}`, record).subscribe({
+      this.http.post<ApiAttendance>(`${this.apiUrl}`, record).subscribe({
         next: (created) => {
           this.isLoadingSignal.set(false);
           resolve(created);

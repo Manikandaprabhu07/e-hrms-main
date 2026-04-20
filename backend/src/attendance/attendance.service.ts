@@ -23,6 +23,10 @@ export class AttendanceService {
     }
 
     async findForEmployee(employeeId: string): Promise<Attendance[]> {
+        const employeeExists = await this.employeesRepository.findOne({ where: { id: employeeId } });
+        if (!employeeExists) {
+            throw new NotFoundException(`Employee with ID ${employeeId} not found.`);
+        }
         return this.attendanceRepository.find({
             where: { employee: { id: employeeId } as any },
             relations: ['employee'],
