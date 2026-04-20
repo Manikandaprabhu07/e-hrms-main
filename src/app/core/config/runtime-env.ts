@@ -17,7 +17,7 @@ function normalizeBaseUrl(url: string | undefined): string | undefined {
 
 export function getRuntimeEnv(): Required<RuntimeEnv> {
   const env = typeof window !== 'undefined' ? window.__env : undefined;
-  const apiBase = normalizeBaseUrl(env?.API_BASE_URL) ?? 'http://localhost:3000';
+  const apiBase = normalizeBaseUrl(env?.API_BASE_URL) ?? 'e-hrms-main-production.up.railway.app';
   const socketBase = normalizeBaseUrl(env?.SOCKET_BASE_URL) ?? apiBase;
   return { API_BASE_URL: apiBase, SOCKET_BASE_URL: socketBase };
 }
