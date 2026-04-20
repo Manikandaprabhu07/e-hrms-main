@@ -1,6 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { getRuntimeEnv } from '../config/runtime-env';
+
+const BASE = getRuntimeEnv().API_BASE_URL;
 
 export interface ChatbarOverview {
   unreadNotifications: number;
@@ -66,7 +69,7 @@ export class ChatbarService {
   }
 
   async loadOverview(): Promise<void> {
-    const ov = await firstValueFrom(this.http.get<ChatbarOverview>('/api/chatbar/overview'));
+    const ov = await firstValueFrom(this.http.get<ChatbarOverview>(`${BASE}/chatbar/overview`));
     this.overviewSignal.set(ov || { unreadNotifications: 0, unreadMessages: 0 });
   }
 
@@ -75,7 +78,7 @@ export class ChatbarService {
       return;
     }
 
-    this.eventSource = new EventSource('/api/notifications/stream');
+    this.eventSource = new EventSource(`${BASE}/notifications/stream`);
     this.eventSource.onmessage = (event) => {
       try {
         const payload = JSON.parse(event.data);
@@ -95,38 +98,38 @@ export class ChatbarService {
   }
 
   getMyNotifications(): Promise<ApiNotification[]> {
-    return firstValueFrom(this.http.get<ApiNotification[]>('/api/notifications/my')) as any;
+    return firstValueFrom(this.http.get<ApiNotification[]>(`${BASE}/notifications/my`)) as any;
   }
 
   markAllNotificationsRead(): Promise<any> {
-    return firstValueFrom(this.http.patch('/api/notifications/my/read-all', {})) as any;
+    return firstValueFrom(this.http.patch(`${BASE}/notifications/my/read-all`, {})) as any;
   }
 
   markNotificationRead(id: string): Promise<any> {
-    return firstValueFrom(this.http.patch(`/api/notifications/${id}/read`, {})) as any;
+    return firstValueFrom(this.http.patch(`${BASE}/notifications/${id}/read`, {})) as any;
   }
 
   getMyConversations(): Promise<ApiConversation[]> {
-    return firstValueFrom(this.http.get<ApiConversation[]>('/api/messages/my/conversations')) as any;
+    return firstValueFrom(this.http.get<ApiConversation[]>(`${BASE}/messages/my/conversations`)) as any;
   }
 
   startMyConversation(): Promise<any> {
-    return firstValueFrom(this.http.post('/api/messages/start', {})) as any;
+    return firstValueFrom(this.http.post(`${BASE}/messages/start`, {})) as any;
   }
 
   startConversationForEmployee(employeeId: string): Promise<any> {
-    return firstValueFrom(this.http.post(`/api/messages/start/employee/${employeeId}`, {})) as any;
+    return firstValueFrom(this.http.post(`${BASE}/messages/start/employee/${employeeId}`, {})) as any;
   }
 
   getConversationMessages(conversationId: string): Promise<ApiMessage[]> {
-    return firstValueFrom(this.http.get<ApiMessage[]>(`/api/messages/conversations/${conversationId}`)) as any;
+    return firstValueFrom(this.http.get<ApiMessage[]>(`${BASE}/messages/conversations/${conversationId}`)) as any;
   }
 
   markConversationRead(conversationId: string): Promise<any> {
-    return firstValueFrom(this.http.patch(`/api/messages/conversations/${conversationId}/read`, {})) as any;
+    return firstValueFrom(this.http.patch(`${BASE}/messages/conversations/${conversationId}/read`, {})) as any;
   }
 
   sendMessage(conversationId: string, content: string): Promise<ApiMessage> {
-    return firstValueFrom(this.http.post<ApiMessage>(`/api/messages/conversations/${conversationId}`, { content })) as any;
+    return firstValueFrom(this.http.post<ApiMessage>(`${BASE}/messages/conversations/${conversationId}`, { content })) as any;
   }
 }

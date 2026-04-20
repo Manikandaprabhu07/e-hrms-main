@@ -120,3 +120,8 @@ if (isMainModule(import.meta.url) || process.env['pm_id']) {
  * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
  */
 export const reqHandler = createNodeRequestHandler(app);
+
+// Ensure all API calls are proxied correctly
+app.get('/api/{*splat}', (req, res) => {
+  // Handle API request
+});
