@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Conversation } from './entities/conversation.entity';
 import { Message } from './entities/message.entity';
 import { MessagesService } from './messages.service';
@@ -15,6 +17,14 @@ import { EmployeesModule } from '../employees/employees.module';
     UsersModule,
     EmployeesModule,
     NotificationsModule,
+     JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' },
+      }),
+      inject: [ConfigService],
+    }),
   ],
   providers: [MessagesService, ChatGateway],
   controllers: [MessagesController],
