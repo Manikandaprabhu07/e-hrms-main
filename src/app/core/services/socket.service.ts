@@ -191,6 +191,12 @@ export class SocketService {
       }
     });
 
+    this.notificationSocket.on('allNotificationsRead', () => {
+      const notifications = this.notificationsSubject.value.map((n) => ({ ...n, isRead: true }));
+      this.notificationsSubject.next(notifications);
+      this.unreadCountSubject.next(0);
+    });
+
     this.notificationSocket.on('error', (error: any) => {
       console.error('Notification socket error:', error);
     });
@@ -221,7 +227,11 @@ export class SocketService {
 
   markNotificationAsRead(notificationId: string): void {
     if (!this.notificationSocket?.connected) return;
-    this.notificationSocket.emit('markAsRead', { notificationId });
+    if (notificationId === 'all') {
+      this.notificationSocket.emit('markAllRead', {});
+    } else {
+      this.notificationSocket.emit('markAsRead', { notificationId });
+    }
   }
 
   getUnreadCount(): void {

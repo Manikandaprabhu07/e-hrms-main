@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { Notification } from './entities/notification.entity';
@@ -21,9 +21,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),
   ],
-  providers: [NotificationsService, NotificationsGateway],
+  // forwardRef on both so NestJS can resolve the circular dep:
+  // NotificationsService → NotificationsGateway → NotificationsService
+  providers: [
+    {
+      provide: NotificationsService,
+      useClass: NotificationsService,
+    },
+    {
+      provide: NotificationsGateway,
+      useClass: NotificationsGateway,
+    },
+  ],
   controllers: [NotificationsController],
   exports: [NotificationsService, NotificationsGateway],
 })
-export class NotificationsModule { }
-
+export class NotificationsModule {}

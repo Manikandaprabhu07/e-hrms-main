@@ -42,9 +42,6 @@ export interface ApiMessage {
 @Injectable({ providedIn: 'root' })
 export class ChatbarService {
   private http = inject(HttpClient);
-  private eventSource?: EventSource;
-  private liveNotificationSignal = signal<any | null>(null);
-  liveNotification = this.liveNotificationSignal.asReadonly();
 
   private openSignal = signal<boolean>(false);
   isOpen = this.openSignal.asReadonly();
@@ -52,9 +49,7 @@ export class ChatbarService {
   private overviewSignal = signal<ChatbarOverview>({ unreadNotifications: 0, unreadMessages: 0 });
   overview = this.overviewSignal.asReadonly();
 
-  constructor() {
-    this.initializeLiveEvents();
-  }
+  constructor() {}
 
   open(): void {
     this.openSignal.set(true);
@@ -73,29 +68,6 @@ export class ChatbarService {
     this.overviewSignal.set(ov || { unreadNotifications: 0, unreadMessages: 0 });
   }
 
-  private initializeLiveEvents(): void {
-    if (typeof EventSource === 'undefined' || this.eventSource) {
-      return;
-    }
-
-    this.eventSource = new EventSource(`${BASE}/notifications/stream`);
-    this.eventSource.onmessage = (event) => {
-      try {
-        const payload = JSON.parse(event.data);
-        this.liveNotificationSignal.set(payload);
-        void this.loadOverview();
-      } catch {
-      }
-    };
-
-    this.eventSource.onerror = () => {
-      setTimeout(() => {
-        this.eventSource?.close();
-        this.eventSource = undefined;
-        this.initializeLiveEvents();
-      }, 5000);
-    };
-  }
 
   getMyNotifications(): Promise<ApiNotification[]> {
     return firstValueFrom(this.http.get<ApiNotification[]>(`${BASE}/notifications/my`)) as any;

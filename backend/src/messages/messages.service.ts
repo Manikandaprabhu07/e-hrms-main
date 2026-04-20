@@ -6,6 +6,7 @@ import { Message } from './entities/message.entity';
 import { UsersService } from '../users/users.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EmployeesService } from '../employees/employees.service';
+import { ChatGateway } from './chat.gateway';
 
 @Injectable()
 export class MessagesService {
@@ -19,7 +20,8 @@ export class MessagesService {
     private usersService: UsersService,
     private employeesService: EmployeesService,
     private notificationsService: NotificationsService,
-  ) { }
+    private chatGateway: ChatGateway,
+  ) {}
 
   private async getAdminUserId(): Promise<string> {
     if (this.cachedAdminUserId) return this.cachedAdminUserId;
@@ -73,6 +75,7 @@ export class MessagesService {
         where: { conversation: { id: conv.id } as any },
         order: { createdAt: 'DESC' },
       });
+
       const unreadCount = await this.messagesRepository.count({
         where: userId === conv.adminUserId
           ? { conversation: { id: conv.id } as any, unreadForAdmin: true }
@@ -85,9 +88,17 @@ export class MessagesService {
         adminUserId: conv.adminUserId,
         title: isAdminView ? employeeName : 'Admin',
         employee: emp
-          ? { id: emp.id, employeeId: emp.employeeId, name: employeeName, department: emp.department, designation: emp.designation }
+          ? {
+              id: emp.id,
+              employeeId: emp.employeeId,
+              name: employeeName,
+              department: emp.department,
+              designation: emp.designation,
+            }
           : null,
-        lastMessage: last ? { content: last.content, createdAt: last.createdAt, senderUserId: last.senderUserId } : null,
+        lastMessage: last
+          ? { content: last.content, createdAt: last.createdAt, senderUserId: last.senderUserId }
+          : null,
         unreadCount,
         updatedAt: conv.updatedAt,
       });
@@ -106,18 +117,30 @@ export class MessagesService {
   async markConversationRead(conversationId: string, userId: string): Promise<void> {
     const conv = await this.assertMember(conversationId, userId);
     if (conv.adminUserId === userId) {
-      await this.messagesRepository.update({ conversation: { id: conversationId } as any } as any, { unreadForAdmin: false } as any);
+      await this.messagesRepository.update(
+        { conversation: { id: conversationId } as any } as any,
+        { unreadForAdmin: false } as any,
+      );
     } else {
-      await this.messagesRepository.update({ conversation: { id: conversationId } as any } as any, { unreadForEmployee: false } as any);
+      await this.messagesRepository.update(
+        { conversation: { id: conversationId } as any } as any,
+        { unreadForEmployee: false } as any,
+      );
     }
   }
 
+  /**
+   * Send a message via REST — persists to DB, then immediately pushes
+   * a newMessage WebSocket event to the recipient (if online).
+   */
   async sendMessage(conversationId: string, userId: string, content: string): Promise<Message> {
     const conv = await this.assertMember(conversationId, userId);
     const trimmed = String(content || '').trim();
     if (!trimmed) throw new BadRequestException('Message content is required');
 
     const isAdminSender = conv.adminUserId === userId;
+    const recipientId = isAdminSender ? conv.employeeUserId : conv.adminUserId;
+
     const msg = this.messagesRepository.create({
       conversation: conv,
       senderUserId: userId,
@@ -127,16 +150,27 @@ export class MessagesService {
     });
     const saved = await this.messagesRepository.save(msg);
 
-    // bump conversation updatedAt
+    // Bump conversation updatedAt
     await this.conversationsRepository.update({ id: conv.id } as any, { updatedAt: new Date() } as any);
 
-    // notify the other party
-    const toUserId = isAdminSender ? conv.employeeUserId : conv.adminUserId;
+    const recipientOnline = this.chatGateway.isUserOnline(recipientId);
+
+    // Push real-time message to recipient via WebSocket
+    this.chatGateway.pushNewMessage(recipientId, {
+      id: saved.id,
+      conversationId: conv.id,
+      senderUserId: userId,
+      content: saved.content,
+      status: recipientOnline ? 'delivered' : 'sent',
+      createdAt: saved.createdAt,
+    });
+
+    // Also create a notification for the recipient
     await this.notificationsService.createForUser({
-      userId: toUserId,
+      userId: recipientId,
       type: 'message',
-      title: 'New message',
-      message: isAdminSender ? 'Admin sent you a message.' : 'Employee sent you a message.',
+      title: 'New Message',
+      message: isAdminSender ? 'You have a new message from Admin.' : 'You have a new message.',
       link: '/dashboard',
       meta: { conversationId: conv.id },
     });
@@ -144,6 +178,7 @@ export class MessagesService {
     return saved;
   }
 
+  /** Alias used by ChatGateway (WebSocket path) */
   async createMessage(conversationId: string, userId: string, content: string): Promise<Message> {
     return this.sendMessage(conversationId, userId, content);
   }

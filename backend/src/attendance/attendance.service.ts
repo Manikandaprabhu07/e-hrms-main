@@ -4,6 +4,34 @@ import { Repository } from 'typeorm';
 import { Attendance } from './entities/attendance.entity';
 import { Employee } from '../employees/entities/employee.entity';
 import { NotificationsService } from '../notifications/notifications.service';
+import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+
+@WebSocketGateway({ cors: true })
+export class AttendanceGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer()
+  server: Server;
+
+  handleConnection(client: Socket) {
+    console.log(`Client connected: ${client.id}`);
+  }
+
+  handleDisconnect(client: Socket) {
+    console.log(`Client disconnected: ${client.id}`);
+  }
+
+  sendNotificationToEmployee(employeeId: string, message: string) {
+    this.server.to(employeeId).emit('notification', { message });
+  }
+
+  sendTypingIndicator(employeeId: string, isTyping: boolean) {
+    this.server.to(employeeId).emit('typing', { isTyping });
+  }
+
+  sendMessageToEmployee(employeeId: string, message: string) {
+    this.server.to(employeeId).emit('message', { message });
+  }
+}
 
 @Injectable()
 export class AttendanceService {
@@ -108,5 +136,12 @@ export class AttendanceService {
 
     async remove(id: string): Promise<void> {
         await this.attendanceRepository.delete(id);
+    }
+
+    async acceptLeaveRequest(employeeId: string, leaveId: string): Promise<void> {
+        // Logic to accept leave request
+        // Notify the employee in real-time
+        const message = 'Your leave request has been approved.';
+        this.notificationsService.sendLeaveApprovalNotification(employeeId, message);
     }
 }

@@ -3,7 +3,7 @@ import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { setDefaultResultOrder } from 'dns';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
-import { url } from 'inspector';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 // Prefer IPv4 addresses to avoid environments where IPv6 is unreachable.
 setDefaultResultOrder('ipv4first');
@@ -15,13 +15,16 @@ async function bootstrap() {
   app.use(json({ limit: '15mb' }));
   app.use(urlencoded({ extended: true, limit: '15mb' }));
 
-  // Enable CORS
+  // Enable CORS for REST
   app.enableCors({
     origin: '*',
     credentials: true,
   });
 
-  // Set global API prefix (but keep GET / working so "backend link" doesn't show 404)
+  // Use Socket.IO adapter with CORS so WebSocket namespaces work
+  app.useWebSocketAdapter(new IoAdapter(app));
+
+  // Set global API prefix
   app.setGlobalPrefix('api', {
     exclude: [{ path: '', method: RequestMethod.GET }],
   });
@@ -33,8 +36,9 @@ async function bootstrap() {
     transform: true,
   }));
 
-  const url = process.env.PORT ?? 3000;
-  await app.listen(url);
-  console.log(`Application is running on: ${url}/api`);
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
+  console.log(`Application is running on port: ${port}`);
+  console.log(`WebSocket namespaces: /chat  /notifications`);
 }
 bootstrap();

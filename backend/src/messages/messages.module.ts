@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -16,8 +16,8 @@ import { EmployeesModule } from '../employees/employees.module';
     TypeOrmModule.forFeature([Conversation, Message]),
     UsersModule,
     EmployeesModule,
-    NotificationsModule,
-     JwtModule.registerAsync({
+    forwardRef(() => NotificationsModule),
+    JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
@@ -30,5 +30,4 @@ import { EmployeesModule } from '../employees/employees.module';
   controllers: [MessagesController],
   exports: [MessagesService, ChatGateway],
 })
-export class MessagesModule { }
-
+export class MessagesModule {}

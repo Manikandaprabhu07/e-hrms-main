@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
+  OnDestroy,
+  OnInit,
   computed,
   inject,
   signal,
@@ -13,6 +15,8 @@ import { SidebarComponent } from './sidebar.component';
 import { UserMenuComponent } from './user-menu.component';
 import { ChatbarComponent } from './chatbar.component';
 import { ChatbarService, EmployeeService, ThemeService } from '../../core/services';
+import { SocketService } from '../../core/services/socket.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-main-layout',
@@ -422,11 +426,13 @@ import { ChatbarService, EmployeeService, ThemeService } from '../../core/servic
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit, OnDestroy {
   private chatbarService = inject(ChatbarService);
   private employeeService = inject(EmployeeService);
   private router = inject(Router);
   private themeService = inject(ThemeService);
+  private socketService = inject(SocketService);
+  private destroy$ = new Subject<void>();
 
   isSidebarCollapsed = signal(false);
   searchText = signal('');
@@ -434,9 +440,14 @@ export class MainLayoutComponent {
   searchResults = signal<Array<{ key: string; title: string; meta: string; route: any[] }>>([]);
   isSearching = signal(false);
   normalizedSearch = computed(() => String(this.searchText() || '').trim());
+
+  // Live badge driven by WebSocket unreadCount$
+  private _liveUnread = signal(0);
   badgeCount = computed(() => {
+    const live = this._liveUnread();
     const overview = this.chatbarService.overview();
-    return (overview?.unreadNotifications || 0) + (overview?.unreadMessages || 0);
+    const pollBadge = (overview?.unreadNotifications || 0) + (overview?.unreadMessages || 0);
+    return live > 0 ? live : pollBadge;
   });
   isDarkTheme = computed(() => this.themeService.theme() === 'dark');
 
@@ -445,7 +456,23 @@ export class MainLayoutComponent {
 
   constructor() {
     void this.chatbarService.loadOverview();
-    setInterval(() => void this.chatbarService.loadOverview(), 15000);
+  }
+
+  ngOnInit(): void {
+    // Connect WebSockets — chat & notifications
+    this.socketService.connectChat();
+    this.socketService.connectNotifications();
+
+    // Drive badge from real-time unread count
+    this.socketService.unreadCount$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((count) => this._liveUnread.set(count));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.socketService.disconnect();
   }
 
   onSidebarCollapse(collapsed: boolean): void {

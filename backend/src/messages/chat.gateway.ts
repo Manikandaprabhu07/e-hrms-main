@@ -8,15 +8,17 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
 
 interface MessagePayload {
   conversationId: string;
   content: string;
   recipientId: string;
+  fileUrl?: string;
+  fileType?: string;
+  fileName?: string;
 }
 
 interface TypingPayload {
@@ -25,7 +27,14 @@ interface TypingPayload {
   isTyping: boolean;
 }
 
+interface MarkReadPayload {
+  messageId: string;
+  conversationId: string;
+  recipientId: string; // original sender — we notify them
+}
+
 @WebSocketGateway({
+  namespace: 'chat',
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
@@ -37,18 +46,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
 
   private logger = new Logger('ChatGateway');
-  private userSockets: Map<string, string> = new Map(); // userId -> socketId
-  private userStatus: Map<string, boolean> = new Map(); // userId -> isOnline
+  // userId -> socketId
+  private userSockets: Map<string, string> = new Map();
+  // userId -> isOnline
+  private userStatus: Map<string, boolean> = new Map();
 
   constructor(
     private messagesService: MessagesService,
     private jwtService: JwtService,
-    private usersService: UsersService,
   ) {}
 
   async handleConnection(client: Socket) {
     try {
-      const token = client.handshake.auth.token;
+      const token = client.handshake.auth?.token;
       if (!token) {
         client.disconnect();
         return;
@@ -61,16 +71,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.userStatus.set(userId, true);
 
       client.join(`user:${userId}`);
-      this.logger.log(`User ${userId} connected with socket ${client.id}`);
+      this.logger.log(`[Chat] User ${userId} connected — socket ${client.id}`);
 
-      // Broadcast online status
+      // Tell everyone this user is online
       this.server.emit('userStatusChanged', {
         userId,
         isOnline: true,
         timestamp: new Date(),
       });
     } catch (error) {
-      this.logger.error('Connection error:', error);
+      this.logger.error('[Chat] Connection error:', error);
       client.disconnect();
     }
   }
@@ -78,7 +88,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(client: Socket) {
     let userId: string | null = null;
 
-    // Find which user this socket belonged to
     for (const [uid, socketId] of this.userSockets.entries()) {
       if (socketId === client.id) {
         userId = uid;
@@ -90,9 +99,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.userSockets.delete(userId);
       this.userStatus.set(userId, false);
 
-      this.logger.log(`User ${userId} disconnected`);
+      this.logger.log(`[Chat] User ${userId} disconnected`);
 
-      // Broadcast offline status
       this.server.emit('userStatusChanged', {
         userId,
         isOnline: false,
@@ -107,96 +115,107 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() payload: MessagePayload,
   ) {
     try {
-      const token = client.handshake.auth.token;
+      const token = client.handshake.auth?.token;
       const decoded = this.jwtService.verify(token);
       const senderId = decoded.sub;
 
-      // Save message to database
+      // Persist message
       const message = await this.messagesService.createMessage(
         payload.conversationId,
         senderId,
         payload.content,
       );
 
-      // Get recipient socket
-      const recipientSocketId = this.userSockets.get(payload.recipientId);
-      const status = recipientSocketId ? 'delivered' : 'sent';
+      const recipientOnline = this.userSockets.has(payload.recipientId);
+      const status = recipientOnline ? 'delivered' : 'sent';
 
       const messageData = {
         id: message.id,
         conversationId: payload.conversationId,
         senderUserId: senderId,
         content: payload.content,
+        fileUrl: payload.fileUrl ?? null,
+        fileType: payload.fileType ?? null,
+        fileName: payload.fileName ?? null,
         status,
         createdAt: message.createdAt,
       };
 
-      // Send to recipient's room
-      this.server.to(`user:${payload.recipientId}`).emit('newMessage', messageData);
+      // Push to recipient in real time
+      this.server
+        .to(`user:${payload.recipientId}`)
+        .emit('newMessage', messageData);
 
-      // Send confirmation to sender
-      client.emit('messageSent', { ...messageData, status: 'sent' });
+      // Confirm to sender
+      client.emit('messageSent', { ...messageData, status });
 
-      this.logger.log(`Message sent from ${senderId} to ${payload.recipientId}`);
+      this.logger.log(
+        `[Chat] Message ${message.id} from ${senderId} → ${payload.recipientId} (${status})`,
+      );
     } catch (error) {
-      this.logger.error('Send message error:', error);
+      this.logger.error('[Chat] sendMessage error:', error);
       client.emit('error', { message: 'Failed to send message' });
     }
   }
 
   @SubscribeMessage('typing')
-  async handleTyping(
+  handleTyping(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: TypingPayload,
   ) {
-    const token = client.handshake.auth.token;
-    const decoded = this.jwtService.verify(token);
-    const userId = decoded.sub;
+    try {
+      const token = client.handshake.auth?.token;
+      const decoded = this.jwtService.verify(token);
+      const userId = decoded.sub;
 
-    // Notify recipient
-    this.server.to(`user:${payload.recipientId}`).emit('userTyping', {
-      conversationId: payload.conversationId,
-      userId,
-      isTyping: payload.isTyping,
-    });
+      this.server.to(`user:${payload.recipientId}`).emit('userTyping', {
+        conversationId: payload.conversationId,
+        userId,
+        isTyping: payload.isTyping,
+      });
+    } catch {
+      // ignore — token may have just expired
+    }
   }
 
   @SubscribeMessage('markAsRead')
   async handleMarkAsRead(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { messageId: string; conversationId: string; recipientId: string },
+    @MessageBody() payload: MarkReadPayload,
   ) {
     try {
-      const token = client.handshake.auth.token;
+      const token = client.handshake.auth?.token;
       const decoded = this.jwtService.verify(token);
       const userId = decoded.sub;
 
-      // Update message status
       await this.messagesService.markMessageAsRead(payload.messageId);
 
-      // Notify sender
-      this.server.emit('messageSeen', {
-        messageId: payload.messageId,
-        conversationId: payload.conversationId,
-        seenBy: userId,
-        timestamp: new Date(),
-      });
+      // Notify the ORIGINAL SENDER (recipientId = the person who sent the message)
+      this.server
+        .to(`user:${payload.recipientId}`)
+        .emit('messageSeen', {
+          messageId: payload.messageId,
+          conversationId: payload.conversationId,
+          seenBy: userId,
+          timestamp: new Date(),
+        });
     } catch (error) {
-      this.logger.error('Mark as read error:', error);
+      this.logger.error('[Chat] markAsRead error:', error);
     }
+  }
+
+  /** Called by MessagesService to push a new message via WS when sent through REST */
+  pushNewMessage(recipientId: string, messageData: any): void {
+    this.server.to(`user:${recipientId}`).emit('newMessage', messageData);
   }
 
   getOnlineUsers(): string[] {
-    const onlineUsers: string[] = [];
-    for (const [userId, isOnline] of this.userStatus.entries()) {
-      if (isOnline) {
-        onlineUsers.push(userId);
-      }
-    }
-    return onlineUsers;
+    return Array.from(this.userStatus.entries())
+      .filter(([, online]) => online)
+      .map(([uid]) => uid);
   }
 
-  getUserSocketId(userId: string): string | undefined {
-    return this.userSockets.get(userId);
+  isUserOnline(userId: string): boolean {
+    return this.userStatus.get(userId) === true;
   }
 }

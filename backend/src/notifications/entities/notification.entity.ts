@@ -6,7 +6,11 @@ export type NotificationType =
   | 'training'
   | 'leave'
   | 'attendance'
-  | 'message';
+  | 'message'
+  | 'approval'
+  | 'delete_request'
+  | 'password_reset'
+  | 'new_employee';
 
 @Entity('notifications')
 export class Notification {
