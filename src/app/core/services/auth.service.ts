@@ -11,7 +11,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
-  private apiUrl = '/api/auth';
+  private apiUrl = '/auth';
 
   // State signals
   private authStateSignal = signal<AuthState>({
