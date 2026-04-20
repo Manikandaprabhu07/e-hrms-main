@@ -10,12 +10,11 @@ import { ChatGateway } from './chat.gateway';
 import { UsersModule } from '../users/users.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { EmployeesModule } from '../employees/employees.module';
-
 @Module({
   imports: [
     TypeOrmModule.forFeature([Conversation, Message]),
     UsersModule,
-    EmployeesModule,
+    forwardRef(() => EmployeesModule),
     forwardRef(() => NotificationsModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],
