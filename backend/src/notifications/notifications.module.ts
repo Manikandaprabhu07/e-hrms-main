@@ -7,9 +7,10 @@ import { NotificationsController } from './notifications.controller';
 import { NotificationsGateway } from './notifications.gateway';
 import { UsersModule } from '../users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-
+import { MessagesModule } from '../messages/messages.module';
 @Module({
   imports: [
+    forwardRef(() => MessagesModule),
     TypeOrmModule.forFeature([Notification]),
     UsersModule,
     JwtModule.registerAsync({

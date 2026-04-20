@@ -11,7 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { Injectable, Logger } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { JwtService } from '@nestjs/jwt';
-
+import { Inject, forwardRef } from '@nestjs/common';
 interface MessagePayload {
   conversationId: string;
   content: string;
@@ -52,6 +52,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private userStatus: Map<string, boolean> = new Map();
 
   constructor(
+    @Inject(forwardRef(() => MessagesService))
     private messagesService: MessagesService,
     private jwtService: JwtService,
   ) {}
