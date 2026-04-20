@@ -1,13 +1,16 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { LeaveRequest } from '../models';
+import { getRuntimeEnv } from '../config/runtime-env';
+
+const BASE = getRuntimeEnv().API_BASE_URL;
 
 @Injectable({
   providedIn: 'root'
 })
 export class LeaveService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/leave';
+  private apiUrl = `${BASE}/leave`;
 
   private leaveRequestsSignal = signal<LeaveRequest[]>([]);
   private isLoadingSignal = signal<boolean>(false);

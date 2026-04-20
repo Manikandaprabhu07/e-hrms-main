@@ -1,13 +1,16 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { PayrollSlip, EmployeeSalaryStructure, PaginationParams, PaginatedResponse } from '../models';
+import { getRuntimeEnv } from '../config/runtime-env';
+
+const BASE = getRuntimeEnv().API_BASE_URL;
 
 @Injectable({
   providedIn: 'root'
 })
 export class PayrollService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/payroll';
+  private apiUrl = `${BASE}/payroll`;
 
   private payrollSlipsSignal = signal<PayrollSlip[]>([]);
   private salaryStructuresSignal = signal<EmployeeSalaryStructure[]>([]);

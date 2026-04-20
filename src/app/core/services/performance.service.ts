@@ -1,13 +1,15 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { PerformanceAppraisal, TrainingEnrollment, PaginationParams, PaginatedResponse } from '../models';
+import { getRuntimeEnv } from '../config/runtime-env';
 
+const BASE = getRuntimeEnv().API_BASE_URL;
 @Injectable({
   providedIn: 'root'
 })
 export class PerformanceService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/performance';
+  private apiUrl = '${BASE}/performance';
 
   private appraisalsSignal = signal<PerformanceAppraisal[]>([]);
   private trainingsSignal = signal<TrainingEnrollment[]>([]);

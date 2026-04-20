@@ -7,13 +7,16 @@ import {
   PaginationParams,
   PaginatedResponse
 } from '../models';
+import { getRuntimeEnv } from '../config/runtime-env';
+
+const BASE = getRuntimeEnv().API_BASE_URL;
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmployeeService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/employees';
+  private apiUrl = `${BASE}/employees`;
 
   // State signals
   private employeesSignal = signal<Employee[]>([]);

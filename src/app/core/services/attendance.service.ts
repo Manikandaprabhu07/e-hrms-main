@@ -1,5 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { getRuntimeEnv } from '../config/runtime-env';
+
+const BASE = getRuntimeEnv().API_BASE_URL;
 
 export type AttendanceStatus =
   | 'present'
@@ -34,7 +37,7 @@ export interface ApiAttendance {
 })
 export class AttendanceService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/attendance';
+  private apiUrl = `${BASE}/attendance`;
 
   private attendanceRecordsSignal = signal<ApiAttendance[]>([]);
   private isLoadingSignal = signal<boolean>(false);
@@ -49,7 +52,7 @@ export class AttendanceService {
     this.errorSignal.set(null);
 
     return new Promise((resolve, reject) => {
-      this.http.get<ApiAttendance[]>(`${this.apiUrl}`).subscribe({
+      this.http.get<ApiAttendance[]>(`${BASE}/attendance`).subscribe({
         next: (records) => {
           this.isLoadingSignal.set(false);
           this.attendanceRecordsSignal.set(records || []);
@@ -69,7 +72,7 @@ export class AttendanceService {
     this.errorSignal.set(null);
 
     return new Promise((resolve, reject) => {
-      this.http.get<ApiAttendance[]>(`${this.apiUrl}/employee/${employeeId}`).subscribe({
+      this.http.get<ApiAttendance[]>(`${BASE}/employee/${employeeId}`).subscribe({
         next: (records) => {
           this.isLoadingSignal.set(false);
           this.attendanceRecordsSignal.set(records || []);
@@ -89,7 +92,7 @@ export class AttendanceService {
     this.errorSignal.set(null);
 
     return new Promise((resolve, reject) => {
-      this.http.get<ApiAttendance[]>(`${this.apiUrl}/my`).subscribe({
+      this.http.get<ApiAttendance[]>(`${BASE}/my`).subscribe({
         next: (records) => {
           this.isLoadingSignal.set(false);
           this.attendanceRecordsSignal.set(records || []);
@@ -109,7 +112,7 @@ export class AttendanceService {
     this.errorSignal.set(null);
 
     return new Promise((resolve, reject) => {
-      this.http.post<ApiAttendance>(`${this.apiUrl}`, record).subscribe({
+      this.http.post<ApiAttendance>(`${BASE}`, record).subscribe({
         next: (created) => {
           this.isLoadingSignal.set(false);
           resolve(created);

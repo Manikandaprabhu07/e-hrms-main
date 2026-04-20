@@ -1,12 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { getRuntimeEnv } from '../config/runtime-env';
+
+
+const BASE = getRuntimeEnv().API_BASE_URL;
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class FeedbackService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/feedback';
+  private apiUrl = `${BASE}/feedback`;
 
   sendFeedback(message: string, employeeId?: string): Promise<any> {
     return new Promise((resolve, reject) => {

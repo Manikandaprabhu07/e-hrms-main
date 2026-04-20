@@ -1,5 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { getRuntimeEnv } from '../config/runtime-env';
+
+
+const BASE = getRuntimeEnv().API_BASE_URL;
+
 
 export interface EventItem {
   id: string;
@@ -13,7 +18,7 @@ export interface EventItem {
 })
 export class EventService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/events';
+  private apiUrl = `${BASE}/events`;
 
   getUpcomingEvents(): Promise<EventItem[]> {
     return new Promise((resolve, reject) => {

@@ -1,5 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { getRuntimeEnv } from '../config/runtime-env';
+
+const BASE = getRuntimeEnv().API_BASE_URL;
+
 
 export interface TrainingSession {
     id: string;
@@ -24,7 +28,7 @@ export interface TrainingSession {
 })
 export class TrainingService {
     private http = inject(HttpClient);
-    private apiUrl = '/api/training';
+    private apiUrl = `${BASE}/training`;
 
     private trainingSessionsSignal = signal<TrainingSession[]>([]);
     private myAssignmentsSignal = signal<any[]>([]);
