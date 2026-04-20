@@ -1,6 +1,6 @@
 [build]
   command = "ng build --configuration production"
-  publish = "dist/e-hrms"
+  publish = "dist/e-hrms/browser"
 
 [[redirects]]
   from = "/*"
