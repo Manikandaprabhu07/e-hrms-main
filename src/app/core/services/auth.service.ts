@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthState, LoginRequest, LoginResponse, User, RegisterRequest, ChangePasswordRequest, ChangeEmailRequest } from '../models';
 import { isPlatformBrowser } from '@angular/common';
+import { getRuntimeEnv } from '../config/runtime-env';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
-  private apiUrl = '/auth';
+  private apiUrl = `${getRuntimeEnv().API_BASE_URL}/auth`;
 
   // State signals
   private authStateSignal = signal<AuthState>({
