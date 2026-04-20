@@ -14,7 +14,7 @@ import { MessagesModule } from '../messages/messages.module';
     TypeOrmModule.forFeature([Notification]),
     UsersModule,
     JwtModule.registerAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule], 
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: '1d' },
