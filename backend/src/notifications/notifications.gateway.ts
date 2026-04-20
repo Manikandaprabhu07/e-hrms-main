@@ -122,7 +122,7 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
       createdAt: Date;
     },
   ) {
-    this.server.to(`notifications:${userId}`).emit('notification', {
+    this.server!.to(`notifications:${userId}`).emit('notification', {
       id: notification.id,
       type: notification.type,
       title: notification.title,
@@ -134,7 +134,7 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
 
     // Update unread count
     const unreadCount = await this.notificationsService.getUnreadCount(userId);
-    this.server.to(`notifications:${userId}`).emit('unreadCount', { count: unreadCount });
+    this.server!.to(`notifications:${userId}`).emit('unreadCount', { count: unreadCount });
   }
 
   async notifyMultipleUsers(userIds: string[], notification: any) {
