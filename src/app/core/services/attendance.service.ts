@@ -52,7 +52,7 @@ export class AttendanceService {
     this.errorSignal.set(null);
 
     return new Promise((resolve, reject) => {
-      this.http.get<ApiAttendance[]>(`${this.apiUrl}/attendance`).subscribe({
+      this.http.get<ApiAttendance[]>(`${BASE}/attendance`).subscribe({
         next: (records) => {
           this.isLoadingSignal.set(false);
           this.attendanceRecordsSignal.set(records || []);
