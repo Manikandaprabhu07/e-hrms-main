@@ -179,7 +179,7 @@ import { Subscription } from 'rxjs';
 })
 export class ExpensesComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['expenseType', 'amount', 'description', 'status', 'date', 'actions'];
-  dataSource: MatTableDataSource<ExpenseClaim> = new MatTableDataSource([]);
+  dataSource: MatTableDataSource<ExpenseClaim> = new MatTableDataSource<ExpenseClaim>([]);
   
   totalClaimed = 0;
   pendingCount = 0;
@@ -204,9 +204,12 @@ export class ExpensesComponent implements OnInit, OnDestroy {
     this.loadData();
 
     // Listen for real-time updates
-    this.sub = this.socketService.listen('notification').subscribe((notif: any) => {
-      if (notif.title === 'Expense Claim Updated') {
-        this.loadData();
+    this.sub = this.socketService.notifications$.subscribe((notifications: any[]) => {
+      if (notifications.length > 0) {
+        const latestNotif = notifications[0];
+        if (latestNotif.title === 'Expense Claim Updated') {
+          this.loadData();
+        }
       }
     });
   }
@@ -243,7 +246,7 @@ export class ExpensesComponent implements OnInit, OnDestroy {
       if (result) {
         const payload = {
           ...result,
-          employeeId: this.authService.currentUser()?.id
+          employeeId: this.authService.user()?.id
         };
         this.expensesService.create(payload).subscribe(() => {
           this.loadData();

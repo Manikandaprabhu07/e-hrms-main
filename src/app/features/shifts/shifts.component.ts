@@ -144,7 +144,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class ShiftsComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['name', 'employee', 'startTime', 'startDate'];
-  dataSource: MatTableDataSource<ShiftAssignment> = new MatTableDataSource([]);
+  dataSource: MatTableDataSource<ShiftAssignment> = new MatTableDataSource<ShiftAssignment>([]);
   
   shiftTypes: ShiftType[] = [];
   employees: any[] = [];
@@ -167,9 +167,12 @@ export class ShiftsComponent implements OnInit, OnDestroy {
     this.loadData();
 
     // Listen for real-time updates
-    this.sub = this.socketService.listen('notification').subscribe((notif: any) => {
-      if (notif.title === 'New Shift Assigned') {
-        this.loadData();
+    this.sub = this.socketService.notifications$.subscribe((notifications: any[]) => {
+      if (notifications.length > 0) {
+        const latestNotif = notifications[0];
+        if (latestNotif.title === 'New Shift Assigned') {
+          this.loadData();
+        }
       }
     });
   }
@@ -182,17 +185,17 @@ export class ShiftsComponent implements OnInit, OnDestroy {
     forkJoin({
       assignments: this.shiftsService.findAllAssignments(),
       types: this.shiftsService.findAllShiftTypes(),
-      employees: this.employeeService.getEmployees()
+      employees: this.employeeService.getEmployees({ pageNumber: 1, pageSize: 100 })
     }).subscribe({
       next: (res: any) => {
         this.shiftTypes = res.types;
-        this.employees = res.employees;
+        this.employees = Array.isArray(res.employees) ? res.employees : (res.employees.items || res.employees.data || []);
         this.totalAssignments = res.assignments.length;
         
         // Filter assignments for non-admins
         let data = res.assignments;
         if (!this.isAdmin) {
-          const currentUserId = this.authService.currentUser()?.id;
+          const currentUserId = this.authService.user()?.id;
           data = data.filter((a: any) => a.employeeId === currentUserId);
         }
 
