@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { getRuntimeEnv } from '../config/runtime-env';
 
 export interface ShiftType {
   id: string;
@@ -23,7 +23,7 @@ export interface ShiftAssignment {
 })
 export class ShiftsService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/shifts`;
+  private apiUrl = `${getRuntimeEnv().API_BASE_URL}/shifts`;
 
   findAllShiftTypes(): Observable<ShiftType[]> {
     return this.http.get<ShiftType[]>(`${this.apiUrl}/types`);

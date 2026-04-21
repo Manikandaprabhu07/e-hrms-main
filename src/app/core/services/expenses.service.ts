@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { getRuntimeEnv } from '../config/runtime-env';
 
 export interface ExpenseClaim {
   id: string;
@@ -21,7 +21,7 @@ export interface ExpenseClaim {
 })
 export class ExpensesService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/expenses`;
+  private apiUrl = `${getRuntimeEnv().API_BASE_URL}/expenses`;
 
   findAll(): Observable<ExpenseClaim[]> {
     return this.http.get<ExpenseClaim[]>(this.apiUrl);
