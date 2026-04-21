@@ -1,4 +1,4 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -9,23 +9,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
-export interface ExpenseClaim {
-  id: string;
-  expenseType: string;
-  amount: number;
-  currency: string;
-  description: string;
-  status: string;
-  date: string;
-}
-
-const MOCK_EXPENSES: ExpenseClaim[] = [
-  { id: '1', expenseType: 'Travel', amount: 450.00, currency: 'USD', description: 'Flight to NYC for conference', status: 'Approved', date: '2026-04-12' },
-  { id: '2', expenseType: 'Meals', amount: 65.50, currency: 'USD', description: 'Client dinner', status: 'Pending', date: '2026-04-14' },
-  { id: '3', expenseType: 'Supplies', amount: 120.00, currency: 'USD', description: 'Office monitor stand', status: 'Paid', date: '2026-03-25' },
-  { id: '4', expenseType: 'Travel', amount: 35.00, currency: 'USD', description: 'Uber to airport', status: 'Rejected', date: '2026-04-12' },
-  { id: '5', expenseType: 'Training', amount: 299.00, currency: 'USD', description: 'Angular advanced course', status: 'Pending', date: '2026-04-20' },
-];
+import { ExpenseDialogComponent } from './expense-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
+import { ExpensesService, ExpenseClaim } from '../../core/services/expenses.service';
+import { SocketService } from '../../core/services/socket.service';
+import { AuthService } from '../../core/services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-expenses',
@@ -45,9 +34,48 @@ const MOCK_EXPENSES: ExpenseClaim[] = [
     <div class="p-6">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-teal-300">Expense Claims</h1>
-        <button mat-raised-button color="primary" class="!bg-teal-500 !text-white">
+        <button mat-raised-button color="primary" class="!bg-teal-500 !text-white" (click)="openExpenseDialog()">
           <mat-icon>add</mat-icon> New Claim
         </button>
+      </div>
+
+      <!-- Dashboard Summary -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <mat-card class="bg-navy-800 text-white shadow-xl !bg-opacity-50 !backdrop-blur-md border-l-4 border-teal-400">
+          <mat-card-content class="p-6 flex items-center justify-between">
+            <div>
+              <p class="text-gray-400 text-sm uppercase tracking-wider font-semibold">Total Claimed</p>
+              <h3 class="text-3xl font-bold mt-1 text-white">₹{{ totalClaimed | number:'1.2-2' }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-teal-500/20 flex items-center justify-center">
+              <mat-icon class="text-teal-400 text-2xl">account_balance_wallet</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="bg-navy-800 text-white shadow-xl !bg-opacity-50 !backdrop-blur-md border-l-4 border-yellow-400">
+          <mat-card-content class="p-6 flex items-center justify-between">
+            <div>
+              <p class="text-gray-400 text-sm uppercase tracking-wider font-semibold">Pending Approvals</p>
+              <h3 class="text-3xl font-bold mt-1 text-white">{{ pendingCount }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center">
+              <mat-icon class="text-yellow-400 text-2xl">hourglass_empty</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="bg-navy-800 text-white shadow-xl !bg-opacity-50 !backdrop-blur-md border-l-4 border-green-400">
+          <mat-card-content class="p-6 flex items-center justify-between">
+            <div>
+              <p class="text-gray-400 text-sm uppercase tracking-wider font-semibold">Approved (This Month)</p>
+              <h3 class="text-3xl font-bold mt-1 text-white">₹{{ approvedAmount | number:'1.2-2' }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+              <mat-icon class="text-green-400 text-2xl">check_circle</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
       </div>
 
       <mat-card class="bg-navy-800 text-white shadow-xl !bg-opacity-50 !backdrop-blur-md">
@@ -105,18 +133,18 @@ const MOCK_EXPENSES: ExpenseClaim[] = [
               <!-- Date Column -->
               <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-gray-300 !border-gray-700"> Date </th>
-                <td mat-cell *matCellDef="let row" class="text-gray-300 !border-gray-700"> {{row.date | date}} </td>
+                <td mat-cell *matCellDef="let row" class="text-gray-300 !border-gray-700"> {{row.createdAt | date}} </td>
               </ng-container>
 
               <!-- Actions Column -->
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef class="text-gray-300 !border-gray-700"> Actions </th>
                 <td mat-cell *matCellDef="let row" class="!border-gray-700">
-                  <button mat-icon-button color="primary" class="!text-blue-400" aria-label="Edit">
-                    <mat-icon>visibility</mat-icon>
+                  <button mat-icon-button color="primary" class="!text-blue-400" aria-label="Edit" *ngIf="isAdmin" (click)="approve(row.id)">
+                    <mat-icon>check</mat-icon>
                   </button>
-                  <button mat-icon-button color="warn" class="!text-red-400" aria-label="Delete" [disabled]="row.status === 'Paid'">
-                    <mat-icon>delete</mat-icon>
+                  <button mat-icon-button color="warn" class="!text-red-400" aria-label="Delete" [disabled]="row.status === 'Paid'" *ngIf="isAdmin" (click)="reject(row.id)">
+                    <mat-icon>close</mat-icon>
                   </button>
                 </td>
               </ng-container>
@@ -149,20 +177,54 @@ const MOCK_EXPENSES: ExpenseClaim[] = [
     ::ng-deep .mat-sort-header-arrow { color: white !important; }
   `]
 })
-export class ExpensesComponent implements AfterViewInit {
+export class ExpensesComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['expenseType', 'amount', 'description', 'status', 'date', 'actions'];
-  dataSource: MatTableDataSource<ExpenseClaim>;
+  dataSource: MatTableDataSource<ExpenseClaim> = new MatTableDataSource([]);
+  
+  totalClaimed = 0;
+  pendingCount = 0;
+  approvedAmount = 0;
+  isAdmin = false;
+  private sub?: Subscription;
+
+  private dialog = inject(MatDialog);
+  private expensesService = inject(ExpensesService);
+  private socketService = inject(SocketService);
+  private authService = inject(AuthService);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor() {
-    this.dataSource = new MatTableDataSource(MOCK_EXPENSES);
+  ngOnInit() {
+    this.isAdmin = this.authService.hasRole('ADMIN') || this.authService.hasRole('HR');
+    if (!this.isAdmin) {
+      this.displayedColumns = ['expenseType', 'amount', 'description', 'status', 'date'];
+    }
+    
+    this.loadData();
+
+    // Listen for real-time updates
+    this.sub = this.socketService.listen('notification').subscribe((notif: any) => {
+      if (notif.title === 'Expense Claim Updated') {
+        this.loadData();
+      }
+    });
   }
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+  ngOnDestroy() {
+    this.sub?.unsubscribe();
+  }
+
+  loadData() {
+    this.expensesService.findAll().subscribe(data => {
+      this.dataSource = new MatTableDataSource(data);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+      
+      this.totalClaimed = data.reduce((sum, item) => sum + Number(item.amount), 0);
+      this.pendingCount = data.filter(item => item.status === 'Pending').length;
+      this.approvedAmount = data.filter(item => item.status === 'Approved').reduce((sum, item) => sum + Number(item.amount), 0);
+    });
   }
 
   applyFilter(event: Event) {
@@ -172,5 +234,29 @@ export class ExpensesComponent implements AfterViewInit {
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
+  }
+
+  openExpenseDialog() {
+    const dialogRef = this.dialog.open(ExpenseDialogComponent, { width: '500px' });
+    
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const payload = {
+          ...result,
+          employeeId: this.authService.currentUser()?.id
+        };
+        this.expensesService.create(payload).subscribe(() => {
+          this.loadData();
+        });
+      }
+    });
+  }
+
+  approve(id: string) {
+    this.expensesService.updateStatus(id, 'Approved').subscribe(() => this.loadData());
+  }
+
+  reject(id: string) {
+    this.expensesService.updateStatus(id, 'Rejected').subscribe(() => this.loadData());
   }
 }
