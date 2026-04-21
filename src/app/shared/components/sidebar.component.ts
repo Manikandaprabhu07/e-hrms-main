@@ -269,6 +269,10 @@ export class SidebarComponent {
     { label: 'Attendance', icon: '✅', route: '/attendance' },
     { label: 'Payroll', icon: '💰', route: '/payroll' },
     { label: 'Training', icon: '🎓', route: '/training' },
+    { label: 'Recruitment', icon: '🎯', route: '/recruitment', roles: ['SUPER_ADMIN', 'SUB_ADMIN', 'ADMIN', 'HR'] },
+    { label: 'Shifts & Scheduling', icon: '⏰', route: '/shifts' },
+    { label: 'Expense Claims', icon: '💳', route: '/expenses' },
+    { label: 'Asset Management', icon: '💻', route: '/assets', roles: ['SUPER_ADMIN', 'SUB_ADMIN', 'ADMIN', 'HR'] },
     { label: 'Feedback', icon: '💬', route: '/feedback', roles: ['SUPER_ADMIN', 'SUB_ADMIN', 'ADMIN', 'HR'] }
   ];
 

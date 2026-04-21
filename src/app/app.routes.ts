@@ -77,6 +77,30 @@ export const routes: Routes = [
         path: 'events',
         loadChildren: () => import('./features/events/events.routes').then(m => m.EVENTS_ROUTES),
         canActivate: [AuthGuard]
+      },
+      {
+        path: 'recruitment',
+        loadChildren: () => import('./features/recruitment/recruitment.routes').then(m => m.RECRUITMENT_ROUTES),
+        canActivate: [RoleGuard],
+        data: { roles: ['SUPER_ADMIN', 'SUB_ADMIN', 'ADMIN', 'HR'] }
+      },
+      {
+        path: 'shifts',
+        loadChildren: () => import('./features/shifts/shifts.routes').then(m => m.SHIFTS_ROUTES),
+        canActivate: [RoleGuard],
+        data: { roles: ['SUPER_ADMIN', 'SUB_ADMIN', 'ADMIN', 'HR', 'EMPLOYEE'] }
+      },
+      {
+        path: 'expenses',
+        loadChildren: () => import('./features/expenses/expenses.routes').then(m => m.EXPENSES_ROUTES),
+        canActivate: [RoleGuard],
+        data: { roles: ['SUPER_ADMIN', 'SUB_ADMIN', 'ADMIN', 'HR', 'EMPLOYEE'] }
+      },
+      {
+        path: 'assets',
+        loadChildren: () => import('./features/assets/assets.routes').then(m => m.ASSETS_ROUTES),
+        canActivate: [RoleGuard],
+        data: { roles: ['SUPER_ADMIN', 'SUB_ADMIN', 'ADMIN', 'HR'] }
       }
     ]
   },

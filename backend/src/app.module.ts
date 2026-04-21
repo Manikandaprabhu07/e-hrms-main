@@ -20,6 +20,10 @@ import { MessagesModule } from './messages/messages.module';
 import { ChatbarModule } from './chatbar/chatbar.module';
 import { ApprovalRequestsModule } from './approval-requests/approval-requests.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { RecruitmentModule } from './recruitment/recruitment.module';
+import { ShiftsModule } from './shifts/shifts.module';
+import { ExpensesModule } from './expenses/expenses.module';
+import { AssetsModule } from './assets/assets.module';
 
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
@@ -106,6 +110,10 @@ import { SeedService } from './seed/seed.service';
     ChatbarModule,
     ApprovalRequestsModule,
     AuditLogsModule,
+    RecruitmentModule,
+    ShiftsModule,
+    ExpensesModule,
+    AssetsModule,
   ],
   controllers: [AppController],
   providers: [
